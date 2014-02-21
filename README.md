@@ -14,7 +14,7 @@ googleAuth.auth.secret=SomeSecretHere
 googleAuth.auth.redirectUrl=http://example.com/c/login/googleAuth  
 
 
-These properties can be obtained in the google project console at:
+These properties can be obtained in the Google project console at:
 https://cloud.google.com/console/project
 
 
