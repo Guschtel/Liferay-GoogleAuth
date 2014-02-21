@@ -9,12 +9,14 @@ To enable the Google login you need to enable it in your Portal properties file 
 
 You need to set at least the following properties:
 
-googleAuth.auth.appId=1234567890.apps.googleusercontent.com
-googleAuth.auth.secret=SomeSecretHere
-googleAuth.auth.redirectUrl=http://example.com/c/login/googleAuth
+googleAuth.auth.appId=1234567890.apps.googleusercontent.com  
+googleAuth.auth.secret=SomeSecretHere  
+googleAuth.auth.redirectUrl=http://example.com/c/login/googleAuth  
+
 
 These properties can be obtained in the google project console at:
-	https://cloud.google.com/console/project
+https://cloud.google.com/console/project
+
 
 Create a new project and enable the required APIs.
 In the consent screen you can specify what values (name, logo, etc.) will be presented to the user in the permission screen.
