@@ -3,6 +3,7 @@ package com.liferay.portal.googleauth;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpSession;
@@ -15,6 +16,7 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.Http.Body;
@@ -24,7 +26,9 @@ import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.model.Contact;
 import com.liferay.portal.model.User;
+import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.GoogleAuthPropsKeys;
@@ -179,8 +183,65 @@ public class GoogleAuthImpl implements GoogleAuth {
 		return user;
 	}
 
-	private User updateUser(User user, JSONObject graphData) {
-		// TODO update User object
+	private User updateUser(User user, JSONObject graphData) throws PortalException, SystemException {
+		// update User object
+		String emailAddress = graphData.getString("email");
+		String firstName = graphData.getString("given_name");
+		String lastName = graphData.getString("family_name");
+		
+		String pictureUrl = graphData.getString("picture");
+		
+		boolean male = Validator.equals(graphData.getString("gender"), "male");
+
+		if (emailAddress.equals(user.getEmailAddress())
+				&& firstName.equals(user.getFirstName())
+				&& lastName.equals(user.getLastName())
+				&& (male == user.isMale())) {
+
+			return user;
+		}
+
+		Contact contact = user.getContact();
+
+		Calendar birthdayCal = CalendarFactoryUtil.getCalendar();
+
+		birthdayCal.setTime(contact.getBirthday());
+
+		int birthdayMonth = birthdayCal.get(Calendar.MONTH);
+		int birthdayDay = birthdayCal.get(Calendar.DAY_OF_MONTH);
+		int birthdayYear = birthdayCal.get(Calendar.YEAR);
+
+		long[] groupIds = null;
+		long[] organizationIds = null;
+		long[] roleIds = null;
+		List<UserGroupRole> userGroupRoles = null;
+		long[] userGroupIds = null;
+
+		ServiceContext serviceContext = new ServiceContext();
+
+		if (!emailAddress.equalsIgnoreCase(user.getEmailAddress())) {
+			UserLocalServiceUtil.updateEmailAddress(user.getUserId(),
+					StringPool.BLANK, emailAddress, emailAddress);
+		}
+
+		UserLocalServiceUtil.updateEmailAddressVerified(user.getUserId(), true);
+
+		UserLocalServiceUtil.updateUser(user.getUserId(), StringPool.BLANK,
+				StringPool.BLANK, StringPool.BLANK, false,
+				user.getReminderQueryQuestion(), user.getReminderQueryAnswer(),
+				user.getScreenName(), emailAddress, 0, user.getOpenId(),
+				user.getLanguageId(), user.getTimeZoneId(), user.getGreeting(),
+				user.getComments(), firstName, user.getMiddleName(), lastName,
+				contact.getPrefixId(), contact.getSuffixId(), male,
+				birthdayMonth, birthdayDay, birthdayYear, contact.getSmsSn(),
+				contact.getAimSn(), contact.getFacebookSn(),
+				contact.getIcqSn(), contact.getJabberSn(), contact.getMsnSn(),
+				contact.getMySpaceSn(), contact.getSkypeSn(),
+				contact.getTwitterSn(), contact.getYmSn(),
+				contact.getJobTitle(), groupIds, organizationIds, roleIds,
+				userGroupRoles, userGroupIds, serviceContext);
+
+		// TODO update image
 		
 		// return the user object (necessary for further login processing)
 		return user;
