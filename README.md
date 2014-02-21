@@ -7,7 +7,7 @@ It extends Liferay by adding several classes as well as an AutoLogin for the log
 
 To enable the Google login you need to enable it in your Portal properties file like in the plugins portal-ext.properties.
 
-You need to set at least the following properties:
+You need to set at least the following properties and enable the plugin (default):
 
 googleAuth.auth.appId=1234567890.apps.googleusercontent.com  
 googleAuth.auth.secret=SomeSecretHere  
